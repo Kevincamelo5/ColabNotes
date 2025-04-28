@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Panel Principal{% endblock %}
+{% block content %}
+<div class="card">
+    <h2 class="text-center">¡Bienvenido, {{ current_user.username }}!</h2>
+    <p class="text-center">Este es tu panel principal. Desde aquí pronto podrás:</p>
+    <ul>
+        <li>Crear y guardar tus notas</li>
+        <li>Participar en foros colaborativos</li>
+        <li>Conectar con otros usuarios</li>
+    </ul>
+    <br>
+    <p class="text-center"><em>ColabNotes: tu conocimiento en comunidad</em> 🌟</p>
+</div>
+{% endblock %}
