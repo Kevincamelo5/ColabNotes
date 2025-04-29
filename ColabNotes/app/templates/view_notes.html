@@ -1,0 +1,23 @@
+{% extends "base.html"%}
+{% block title %}Mis Notas{% endblock %}
+{% block content %}
+<div class="card">
+    <h2 class="text-center">Mis Notas</h2>
+    <div class="text-center mb-3">
+        <a href="{{ url_for('main.create_note') }}" class="btn btn-primary">Crear Nueva Nota + </a>
+    </div>
+    {% if notes %}
+    <ul class="list-group">
+        {% for note in notes %}
+        <li class="list-group-item">
+            <strong>{{ note.title }}</strong>
+            <a href="{{ url_for('main.view_note', note_id=note.id) }}" class="btn btn-sm btn-secondary">Ver nota</a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-center">No tienes notas guardadas.</p>
+    {% endif %}
+    <p class="text-center"><a href="{{ url_for('main.create_note') }}"> nota + </a></p>
+</div>
+{% endblock %}

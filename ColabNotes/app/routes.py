@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from app import db
 from app.models import User
+from app.models import Note
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -50,3 +51,68 @@ def dashboard():
 def logout():
     logout_user()
     return redirect(url_for('main.login'))
+
+@main.route('/create_note', methods=['GET', 'POST'])
+@login_required
+def create_note():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+
+        # Validación de datos
+        if not title or not content:
+            flash('Por favor, completa todos los campos.', 'danger')
+            return redirect(url_for('main.create_note'))
+
+        try:
+            new_note = Note(title=title, content=content, user_id=current_user.id)
+            db.session.add(new_note)
+            db.session.commit()
+            flash('Nota creada con éxito.', 'success')
+            return redirect(url_for('main.view_notes'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Ocurrió un error al crear la nota. Inténtalo de nuevo.', 'danger')
+            print(e)  # Para depuración
+
+    return render_template('create_note.html')
+
+@main.route('/delete_note/<int:note_id>', methods=['POST'])
+@login_required
+def delete_note(note_id):
+    note = Note.query.get_or_404(note_id)
+
+    if note.user_id != current_user.id:
+        flash('No tienes permiso para eliminar esta nota.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    try:
+        db.session.delete(note)
+        db.session.commit()
+        flash('Nota eliminada con éxito.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Ocurrió un error al eliminar la nota. Inténtalo de nuevo.', 'danger')
+        print(e)  # Para depuración
+
+    return redirect(url_for('main.dashboard'))
+
+@main.route('/view_notes')
+@login_required
+def view_notes():
+    notes = Note.query.filter_by(user_id=current_user.id).all()
+    return render_template('view_notes.html', notes=notes)
+
+@main.route('/view_note/<int:note_id>', methods=['GET'])
+@login_required
+def view_note(note_id):
+    # Buscar la nota por su ID
+    note = Note.query.get_or_404(note_id)
+
+    # Verificar que la nota pertenezca al usuario actual
+    if note.user_id != current_user.id:
+        flash('No tienes permiso para ver esta nota.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    # Renderizar la plantilla con los detalles de la nota
+    return render_template('view_note.html', note=note)
