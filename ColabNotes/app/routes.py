@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from app import db
-from app.models import User
-from app.models import Note
+from app.models import User, Foro, Note
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -116,3 +115,73 @@ def view_note(note_id):
 
     # Renderizar la plantilla con los detalles de la nota
     return render_template('view_note.html', note=note)
+
+@main.route('/create_foro', methods=['GET', 'POST'])
+@login_required
+def create_foro():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+
+        # Validación de datos
+        if not title or not description:
+            flash('Por favor, completa todos los campos.', 'danger')
+            return redirect(url_for('main.create_foro'))
+
+        try:
+            new_foro = Foro(title=title, description=description)
+            db.session.add(new_foro)
+            db.session.commit()
+
+            # Asociar el foro con el usuario actual
+            current_user.foros.append(new_foro)
+            db.session.commit()
+
+            flash('Foro creado con éxito.', 'success')
+            return redirect(url_for('main.dashboard'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Ocurrió un error al crear el foro: {str(e)}', 'danger')  # Muestra el mensaje de error específico
+            print(e)  # Para depuración
+
+    return render_template('create_foro.html')
+
+
+@main.route('/view_foros')
+@login_required
+def view_foros():
+    # Obtener todos los foros en los que participa el usuario actual
+    foros = current_user.foros.all()
+    return render_template('view_foros.html', foros=foros)
+
+
+@main.route('/join_foro/<int:foro_id>', methods=['POST'])
+@login_required
+def join_foro(foro_id):
+    foro = Foro.query.get_or_404(foro_id)
+
+    # Verificar si el usuario ya está participando en el foro
+    if current_user in foro.participants:
+        flash('Ya estás participando en este foro.', 'info')
+    else:
+        current_user.foros.append(foro)
+        db.session.commit()
+        flash('Te has unido al foro.', 'success')
+
+    return redirect(url_for('main.view_foros'))
+
+
+@main.route('/leave_foro/<int:foro_id>', methods=['POST'])
+@login_required
+def leave_foro(foro_id):
+    foro = Foro.query.get_or_404(foro_id)
+
+    # Verificar si el usuario está participando en el foro
+    if current_user not in foro.participants:
+        flash('No estás participando en este foro.', 'info')
+    else:
+        current_user.foros.remove(foro)
+        db.session.commit()
+        flash('Has abandonado el foro.', 'success')
+
+    return redirect(url_for('main.view_foros'))

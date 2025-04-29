@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Mis Foros{% endblock %}
+{% block content %}
+<div class="card">
+    <h2 class="text-center">Mis Foros</h2>
+    <div class="text-center mb-3">
+        <a href="{{ url_for('main.create_foro') }}" class="btn btn-primary">Crear Nuevo Foro + </a>
+    </div>
+    {% if foros %}
+    <ul class="list-group">
+        {% for foro in foros %}
+        <li class="list-group-item">
+            <strong>{{ foro.title }}</strong><br>
+            <p>{{ foro.description }}</p>
+            <form method="POST" action="{{ url_for('main.leave_foro', foro_id=foro.id) }}" style="display:inline;">
+                <button type="submit" class="btn btn-sm btn-danger">Abandonar Foro</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-center">No participas en ningún foro.</p>
+    {% endif %}
+</div>
+{% endblock %}
