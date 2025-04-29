@@ -40,3 +40,14 @@ class Foro(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
+
+    messages = db.relationship('Message', backref='foro', lazy=True)
+
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text, nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    foro_id = db.Column(db.Integer, db.ForeignKey('foro.id'), nullable=False)
+
+    user = db.relationship('User', backref='messages')

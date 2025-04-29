@@ -94,7 +94,7 @@ def delete_note(note_id):
         flash('Ocurrió un error al eliminar la nota. Inténtalo de nuevo.', 'danger')
         print(e)  # Para depuración
 
-    return redirect(url_for('main.dashboard'))
+    return redirect(url_for('main.view_notes'))
 
 @main.route('/view_notes')
 @login_required
@@ -111,7 +111,7 @@ def view_note(note_id):
     # Verificar que la nota pertenezca al usuario actual
     if note.user_id != current_user.id:
         flash('No tienes permiso para ver esta nota.', 'danger')
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('main.view_notes'))
 
     # Renderizar la plantilla con los detalles de la nota
     return render_template('view_note.html', note=note)
