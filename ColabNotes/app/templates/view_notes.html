@@ -9,10 +9,17 @@
     {% if notes %}
     <ul class="list-group">
         {% for note in notes %}
-        <li class="list-group-item">
+        <div class="d-flex justify-content-between">
             <strong>{{ note.title }}</strong>
             <a href="{{ url_for('main.view_note', note_id=note.id) }}" class="btn btn-sm btn-secondary">Ver nota</a>
-        </li>
+            <!-- Formulario para eliminar la nota -->
+            <form method="POST" action="{{ url_for('main.delete_note', note_id=note.id) }}" style="display:inline;">
+                <button type="submit" class="btn btn-sm btn-danger"
+                    onclick="return confirm('¿Estás seguro de que quieres eliminar esta nota?');">
+                    Eliminar
+                </button>
+            </form>
+        </div>
         {% endfor %}
     </ul>
     {% else %}

@@ -84,7 +84,7 @@ def delete_note(note_id):
 
     if note.user_id != current_user.id:
         flash('No tienes permiso para eliminar esta nota.', 'danger')
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('main.view_notes'))
 
     try:
         db.session.delete(note)
