@@ -161,7 +161,7 @@ def join_foro(foro_id):
     foro = Foro.query.get_or_404(foro_id)
 
     # Verificar si el usuario ya está participando en el foro
-    if current_user in foro.participants:
+    if current_user in foro.users:
         flash('Ya estás participando en este foro.', 'info')
     else:
         current_user.foros.append(foro)
@@ -177,7 +177,7 @@ def leave_foro(foro_id):
     foro = Foro.query.get_or_404(foro_id)
 
     # Verificar si el usuario está participando en el foro
-    if current_user not in foro.participants:
+    if current_user not in foro.users:
         flash('No estás participando en este foro.', 'info')
     else:
         current_user.foros.remove(foro)
