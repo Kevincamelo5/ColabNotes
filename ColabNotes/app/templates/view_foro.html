@@ -1,0 +1,33 @@
+{% estends "base.html" %}
+{% block title %}Foro: {{ Foro.title }} {% endblock %}
+{% block content %}
+<div class="card">
+    <h2 class="text-center">{{ Foro.title }}</h2>
+    <p>{{ foro.description }} </p>
+    <hr>
+    <h3>Mensajes</h3>
+    {% if messages %}
+    <ul class="list-group">
+        {% for message in messages %}
+        <li class="list-group-item">
+            <strong>{{ message.user.username }}</strong>:
+            <small>{{ message.created_at }}</small><br>
+            <p>{{ message.content }}</p>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No hay mensajes en este foro.</p>
+    {% endif %}
+    <hr>
+    <h3>Enviar un mensaje</h3>
+    <form method="POST" action="{{ url_for('main.view_foro', foro_id=foro.id) }}">
+        <div class="form-group">
+            <label>Mensaje:</label>
+            <textarea class="form-control" id="content" name="content" rows="5" placeholder="Ecribir mensaje aquí..."
+                required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+</div>
+{% endblock %}

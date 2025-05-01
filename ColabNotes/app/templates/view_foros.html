@@ -12,6 +12,7 @@
         <li class="list-group-item">
             <strong>{{ foro.title }}</strong><br>
             <p>{{ foro.description }}</p>
+            <a href="{{ url_for('main.view_foro', foro_id=foro.id) }}" class="btn btn-sm btn-secondary">Ver Foro</a>
             <form method="POST" action="{{ url_for('main.leave_foro', foro_id=foro.id) }}" style="display:inline;">
                 <button type="submit" class="btn btn-sm btn-danger">Abandonar Foro</button>
             </form>

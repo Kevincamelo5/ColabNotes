@@ -185,3 +185,35 @@ def leave_foro(foro_id):
         flash('Has abandonado el foro.', 'success')
 
     return redirect(url_for('main.view_foros'))
+
+
+@main.route('/view_foro/<int:foro_id>', methods=['GET', 'POST'])
+@login_required
+def view_foro(foro_id):
+    foro = Foro.query.get_or_404(foro_id)
+
+    # Verificar si el usuario está participando en el foro
+    if current_user not in foro.users.all():
+        flash('No tienes permiso para ver este foro.', 'info')
+        return redirect(url_for('main.view_foros'))
+
+    if request.method == 'POST':
+        content = request.form.get('content')
+
+        # Validación de datos
+        if not content:
+            flash('Por favor, revise el mensaje.', 'danger')
+        else:
+            try:
+                new_message = Message(content=content, user_id=current_user.id, foro_id=foro.id)
+                db.session.add(new_message)
+                db.session.commit()
+                flash('Mensaje enviado con éxito.', 'success')
+                return redirect(url_for('main.view_foro', foro_id=foro.id))
+            except Exception as e:
+                db.session.rollback()
+                flashh(f'Ocurrió un error al enviar el mensaje: {str(e)}', 'danger')
+                print(e)
+    
+    messages = Message.query.filter_by(foro_id=foro.id).order_by(Message.id.desc()).all()
+    return render_template('view_foro.html', foro=foro, messages=messages)
