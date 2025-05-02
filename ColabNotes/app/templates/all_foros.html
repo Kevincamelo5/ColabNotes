@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}
+Foros disponibles
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="text-center">Foros disponibles</h2>
+    <div class="text-center mb-e3">
+        <a href="{{ url_for('main.create_foro') }}" class="btn btn-primary">Crear nuevo foro +</a>
+    </div>
+    {% if foros %}
+    <ul class="list-group">
+        {% for foro in foros %}
+        <li class="list-group-item">
+            <strong>{{ foro.title}}</strong><br>
+            <p>{{ foro.description }}</p>
+            <form method="POST" action="{{ url_for('main.join_foro', foro_id=foro.id) }}" style="display: inline;">
+                <button type="submit" class="btn btn-sm btn-success">Unirse</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-center">No hay foros disponibles.</p>
+    {% endif %}
+</div>
+{% endblock %}

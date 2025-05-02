@@ -217,3 +217,10 @@ def view_foro(foro_id):
     
     messages = Message.query.filter_by(foro_id=foro.id).order_by(Message.id.desc()).all()
     return render_template('view_foro.html', foro=foro, messages=messages)
+
+@main.route('/all_foros')
+@login_required
+def all_foros():
+    #obtener todos los foros disponibles
+    foros = Foro.query.all()
+    return render_template('all_foros.html', foros=foros)
