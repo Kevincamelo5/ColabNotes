@@ -1,8 +1,8 @@
-{% estends "base.html" %}
-{% block title %}Foro: {{ Foro.title }} {% endblock %}
+{% extends "base.html" %}
+{% block title %}Foro: {{ foro.title }} {% endblock %}
 {% block content %}
 <div class="card">
-    <h2 class="text-center">{{ Foro.title }}</h2>
+    <h2 class="text-center">{{ foro.title }}</h2>
     <p>{{ foro.description }} </p>
     <hr>
     <h3>Mensajes</h3>

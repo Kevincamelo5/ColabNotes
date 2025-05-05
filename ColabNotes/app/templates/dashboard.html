@@ -10,6 +10,24 @@
         <li>Conectar con otros usuarios</li>
     </ul>
     <br>
+    <div class="contact-list">
+        <h3>Contactos</h3>
+        {% if contacts %}
+        <ul class="list-group">
+            {% for contact in contacts %}
+            <li class="list-group-item">
+                {{ contact.username }}
+                <form action="{{ url_for('main.remove_contact', user_id=contact.id) }}" method="POST" class="float-end"
+                    style="display: inline;">
+                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-center">No tienes contactos aún. ¡Conéctate con otros usuarios!</p>
+        {% endif %}
+    </div>
     <p class="text-center"><em>ColabNotes: tu conocimiento en comunidad</em> 🌟</p>
 </div>
 {% endblock %}

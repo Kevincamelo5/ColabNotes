@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from app import db
-from app.models import User, Foro, Note
+from app.models import User, Foro, Note, Message
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -44,7 +44,8 @@ def register():
 @main.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('dashboard.html')
+    contacts = current_user.contacts.all()
+    return render_template('dashboard.html', contacts=contacts)
 
 @main.route('/logout')
 def logout():
@@ -161,7 +162,7 @@ def join_foro(foro_id):
     foro = Foro.query.get_or_404(foro_id)
 
     # Verificar si el usuario ya está participando en el foro
-    if current_user in foro.users:
+    if current_user in foro.user_participants.all():
         flash('Ya estás participando en este foro.', 'info')
     else:
         current_user.foros.append(foro)
@@ -177,7 +178,7 @@ def leave_foro(foro_id):
     foro = Foro.query.get_or_404(foro_id)
 
     # Verificar si el usuario está participando en el foro
-    if current_user not in foro.users:
+    if current_user not in foro.user_participants.all():
         flash('No estás participando en este foro.', 'info')
     else:
         current_user.foros.remove(foro)
@@ -193,7 +194,7 @@ def view_foro(foro_id):
     foro = Foro.query.get_or_404(foro_id)
 
     # Verificar si el usuario está participando en el foro
-    if current_user not in foro.users.all():
+    if current_user not in foro.participants.all():
         flash('No tienes permiso para ver este foro.', 'info')
         return redirect(url_for('main.view_foros'))
 
@@ -202,7 +203,7 @@ def view_foro(foro_id):
 
         # Validación de datos
         if not content:
-            flash('Por favor, revise el mensaje.', 'danger')
+            flash('Por favor, revise de que el mensaje no se encuentre vacio.', 'danger')
         else:
             try:
                 new_message = Message(content=content, user_id=current_user.id, foro_id=foro.id)
@@ -212,7 +213,7 @@ def view_foro(foro_id):
                 return redirect(url_for('main.view_foro', foro_id=foro.id))
             except Exception as e:
                 db.session.rollback()
-                flashh(f'Ocurrió un error al enviar el mensaje: {str(e)}', 'danger')
+                flash(f'Ocurrió un error al enviar el mensaje: {str(e)}', 'danger')
                 print(e)
     
     messages = Message.query.filter_by(foro_id=foro.id).order_by(Message.id.desc()).all()
@@ -224,3 +225,33 @@ def all_foros():
     #obtener todos los foros disponibles
     foros = Foro.query.all()
     return render_template('all_foros.html', foros=foros)
+
+@main.route('/add_contact/<int:user_id>', methods=['POST'])
+@login_required
+def add_contact(user_id):
+    user_to_add = User.query.get_or_404(user_id)
+
+    # Verificar si el usuario ya está agregado como contacto
+    if user_to_add in current_user.contacts.all():
+        flash('Este usuario ya está en tus contactos.', 'info')
+    else:
+        current_user.contacts.append(user_to_add)
+        db.session.commit()
+        flash(f'{user_to_add.username} ha sido agregado a tus contactos.', 'success')
+
+    return redirect(url_for('main.dashboard'))
+
+@main.route('/remove_contact/<int:user_id>', methods=['POST'])
+@login_required
+def remove_contact(user_id):
+    user_to_remove = User.query.get_or_404(user_id)
+
+    # Verificar si el usuario está en los contactos
+    if user_to_remove not in current_user.contacts.all():
+        flash('Este usuario no está en tus contactos.', 'info')
+    else:
+        current_user.contacts.remove(user_to_remove)
+        db.session.commit()
+        flash(f'{user_to_remove.username} ha sido eliminado de tus contactos.', 'success')
+
+    return redirect(url_for('main.dashboard'))
